@@ -17,6 +17,11 @@ const PORT = process.env.PORT || 3000;
 
 // FIFO Queue for duel players
 const duelQueue = [];
+let countdownInterval = null;
+let countdownValue = 10;
+let isPlaying = false;
+let gameInterval = null;
+let gameTimeLeft = 45;
 
 // Serve static files from the public directory
 app.use(express.static(path.join(__dirname, 'public')));
@@ -115,6 +120,120 @@ io.on('connection', (socket) => {
     });
 });
 
+// Function to start countdown
+function startCountdown() {
+    if (countdownInterval) {
+        clearInterval(countdownInterval);
+    }
+    
+    countdownValue = 10;
+    console.log('Starting countdown for first 2 players');
+    
+    // Notify first 2 players that countdown is starting
+    if (duelQueue.length >= 1) {
+        io.to(duelQueue[0].id).emit('countdown-start');
+    }
+    if (duelQueue.length >= 2) {
+        io.to(duelQueue[1].id).emit('countdown-start');
+    }
+    
+    countdownInterval = setInterval(() => {
+        countdownValue--;
+        console.log(`Countdown: ${countdownValue}`);
+        
+        // Send countdown update to first 2 players
+        if (duelQueue.length >= 1) {
+            io.to(duelQueue[0].id).emit('countdown-update', countdownValue);
+        }
+        if (duelQueue.length >= 2) {
+            io.to(duelQueue[1].id).emit('countdown-update', countdownValue);
+        }
+        
+        if (countdownValue <= 0) {
+            stopCountdown();
+            startDuel();
+        }
+    }, 1000);
+}
+
+// Function to stop countdown
+function stopCountdown() {
+    if (countdownInterval) {
+        clearInterval(countdownInterval);
+        countdownInterval = null;
+    }
+    
+    // Notify all players that countdown stopped
+    io.emit('countdown-stop');
+    console.log('Countdown stopped');
+}
+
+// Function to start duel
+function startDuel() {
+    if (duelQueue.length < 2) {
+        console.log('Not enough players to start duel');
+        return;
+    }
+    
+    isPlaying = true;
+    gameTimeLeft = 45;
+    console.log('Starting duel between', duelQueue[0].name, 'and', duelQueue[1].name);
+    
+    // Notify first 2 players that duel is starting
+    io.to(duelQueue[0].id).emit('duel-start', {
+        player1: duelQueue[0],
+        player2: duelQueue[1]
+    });
+    io.to(duelQueue[1].id).emit('duel-start', {
+        player1: duelQueue[0],
+        player2: duelQueue[1]
+    });
+    
+    // Players 3+ don't need special notification - they continue seeing queue position
+    
+    // Start game timer
+    gameInterval = setInterval(() => {
+        gameTimeLeft--;
+        console.log(`Game time remaining: ${gameTimeLeft}s`);
+        
+        // Send time update to first 2 players
+        io.to(duelQueue[0].id).emit('game-time-update', gameTimeLeft);
+        io.to(duelQueue[1].id).emit('game-time-update', gameTimeLeft);
+        
+        if (gameTimeLeft <= 0) {
+            endDuel();
+        }
+    }, 1000);
+}
+
+// Function to end duel
+function endDuel() {
+    if (gameInterval) {
+        clearInterval(gameInterval);
+        gameInterval = null;
+    }
+    
+    isPlaying = false;
+    console.log('Duel ended');
+    
+    // Notify first 2 players that game is finished
+    if (duelQueue.length >= 1) {
+        io.to(duelQueue[0].id).emit('duel-end');
+    }
+    if (duelQueue.length >= 2) {
+        io.to(duelQueue[1].id).emit('duel-end');
+    }
+    
+    // Remove first 2 players from queue
+    if (duelQueue.length >= 2) {
+        duelQueue.splice(0, 2);
+        console.log('Removed first 2 players from queue');
+        
+        // Update remaining players
+        broadcastQueueUpdate();
+    }
+}
+
 // Function to broadcast queue update to all players
 function broadcastQueueUpdate() {
     const player1 = duelQueue.length >= 1 ? duelQueue[0].name : null;
@@ -125,6 +244,17 @@ function broadcastQueueUpdate() {
         player2: player2,
         queueLength: duelQueue.length
     });
+    
+    // Handle countdown logic (only if not playing)
+    if (!isPlaying) {
+        if (duelQueue.length === 2) {
+            // Exactly 2 players - start countdown
+            startCountdown();
+        } else if (duelQueue.length < 2) {
+            // Less than 2 players - stop countdown
+            stopCountdown();
+        }
+    }
     
     // Send individual position updates to each player
     duelQueue.forEach((player, index) => {

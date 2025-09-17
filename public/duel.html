@@ -40,6 +40,15 @@
       Geothermal Challenge
     </div>
     
+    <!-- Countdown Overlay -->
+    <div id="countdown-overlay" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+      <div class="bg-white rounded-2xl p-8 text-center">
+        <div id="countdown-title" class="text-[4svw] font-bold text-gray-800 mb-4">Lawan ditemukan!</div>
+        <div  class="text-[3.5svw] text-gray-800 mb-4">Game akan dimulai dalam</div>
+        <div id="countdown-timer" class="text-[8svw] font-black text-red-600">10</div>
+      </div>
+    </div>
+    
     <!-- Waiting for opponent -->
     <div class="bg-white rounded-2xl p-6 mb-6 shadow-lg w-full">
       <div id="waiting-title" class="text-[4svw] font-bold text-gray-800 mb-4">Menunggu Lawan</div>
@@ -241,6 +250,112 @@
       socket.on('opponent-disconnected', () => {
         console.log('Lawan telah keluar dari duel. Kembali ke antrian...');
         window.location.reload();
+      });
+      
+      // Handle countdown events
+      socket.on('countdown-start', () => {
+        console.log('Countdown started');
+        const countdownOverlay = document.getElementById('countdown-overlay');
+        countdownOverlay.classList.remove('hidden');
+        
+        // Ensure countdown text is correct
+        document.getElementById('countdown-title').textContent = 'Lawan ditemukan!';
+        document.getElementById('countdown-subtitle').textContent = 'Game akan dimulai dalam';
+        document.getElementById('countdown-timer').textContent = '10';
+        
+        console.log('Countdown overlay should be visible now');
+      });
+      
+      socket.on('countdown-update', (value) => {
+        console.log('Countdown update:', value);
+        document.getElementById('countdown-timer').textContent = value;
+      });
+      
+      socket.on('countdown-stop', () => {
+        console.log('Countdown stopped');
+        const countdownOverlay = document.getElementById('countdown-overlay');
+        countdownOverlay.classList.add('hidden');
+      });
+      
+      // Handle duel start
+      socket.on('duel-start', (data) => {
+        console.log('Duel started!', data);
+        const countdownOverlay = document.getElementById('countdown-overlay');
+        countdownOverlay.classList.add('hidden');
+        
+        // Change UI to show DUEL mode with player names
+        let player1Name = 'Player 1';
+        let player2Name = 'Player 2';
+        
+        if (data && data.player1 && data.player1.name) {
+          player1Name = data.player1.name;
+        }
+        if (data && data.player2 && data.player2.name) {
+          player2Name = data.player2.name;
+        }
+        
+        document.getElementById('waiting-title').textContent = `${player1Name.toUpperCase()} VS ${player2Name.toUpperCase()}`;
+        document.getElementById('waiting-title').className = 'text-[6svw] font-black text-gray-800 mb-4'; // Larger text
+        
+        // Create subtitle for "Waktu Tersisa"
+        const subtitle = document.getElementById('waiting-subtitle');
+        subtitle.innerHTML = 'Waktu Tersisa<br><span id="game-timer" class="text-[10svw] font-black text-red-600">45</span>';
+        subtitle.className = 'text-[4svw] font-bold text-gray-800 mb-4 text-center';
+        subtitle.style.display = 'block';
+        
+        // Hide player sections
+        document.getElementById('player1-container').style.display = 'none';
+        document.getElementById('player2-container').style.display = 'none';
+        
+        // Hide loading spinner
+        const spinner = document.querySelector('.animate-spin');
+        if (spinner) {
+          spinner.style.display = 'none';
+        }
+      });
+      
+      
+      // Handle game time updates
+      socket.on('game-time-update', (timeLeft) => {
+        console.log('Game time update:', timeLeft);
+        
+        // Update just the timer number
+        const gameTimer = document.getElementById('game-timer');
+        if (gameTimer) {
+          gameTimer.textContent = timeLeft;
+        }
+      });
+      
+      // Handle duel end
+      socket.on('duel-end', () => {
+        console.log('Duel ended!');
+        
+        // Update title
+        document.getElementById('waiting-title').textContent = 'Game selesai! Terima kasih sudah bermain.';
+        
+        // Hide subtitle
+        const waitingSubtitle = document.getElementById('waiting-subtitle');
+        if (waitingSubtitle) {
+          waitingSubtitle.style.display = 'none';
+        }
+        
+        // Hide player containers
+        const player1Container = document.getElementById('player1-container');
+        const player2Container = document.getElementById('player2-container');
+        if (player1Container) player1Container.style.display = 'none';
+        if (player2Container) player2Container.style.display = 'none';
+        
+        // Hide back button
+        const backButton = document.querySelector('button');
+        if (backButton) {
+          backButton.style.display = 'none';
+        }
+        
+        // Hide spinner
+        const spinner = document.querySelector('.animate-spin');
+        if (spinner) {
+          spinner.style.display = 'none';
+        }
       });
       
       // Handle page unload - leave queue
