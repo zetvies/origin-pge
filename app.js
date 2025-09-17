@@ -54,6 +54,12 @@ app.get('/gameover', (req, res) => {
 // WebSocket connection handling
 io.on('connection', (socket) => {
     console.log(`User connected: ${socket.id}`);
+    
+    // Handle game state requests (for indicator)
+    socket.on('request-game-state', () => {
+        console.log(`Sending game state to ${socket.id}: isPlaying=${isPlaying}`);
+        socket.emit('game-state-update', { isPlaying: isPlaying });
+    });
 
     // Handle joining duel queue
     socket.on('join-duel-queue', (playerData) => {
@@ -179,6 +185,9 @@ function startDuel() {
     gameTimeLeft = 45;
     console.log('Starting duel between', duelQueue[0].name, 'and', duelQueue[1].name);
     
+    // Broadcast game state change to all connected clients
+    io.emit('game-state-update', { isPlaying: isPlaying });
+    
     // Notify first 2 players that duel is starting
     io.to(duelQueue[0].id).emit('duel-start', {
         player1: duelQueue[0],
@@ -215,6 +224,9 @@ function endDuel() {
     
     isPlaying = false;
     console.log('Duel ended');
+    
+    // Broadcast game state change to all connected clients
+    io.emit('game-state-update', { isPlaying: isPlaying });
     
     // Notify first 2 players that game is finished
     if (duelQueue.length >= 1) {

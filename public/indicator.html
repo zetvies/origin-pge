@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pertamina - Indicator</title>
+    <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            width: 100vw;
+            height: 100vh;
+            transition: background-color 0.3s ease;
+        }
+        
+        .playing {
+            background-color: white;
+        }
+        
+        .not-playing {
+            background-color: black;
+        }
+    </style>
+</head>
+<body class="not-playing">
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // Connect to WebSocket server
+            const socket = io('http://localhost:3000');
+            
+            // Handle connection
+            socket.on('connect', () => {
+                console.log('Connected to indicator WebSocket');
+            });
+            
+            // Handle connection errors
+            socket.on('connect_error', (error) => {
+                console.error('WebSocket connection error:', error);
+            });
+            
+            // Handle game state updates
+            socket.on('game-state-update', (data) => {
+                console.log('Game state update:', data);
+                const body = document.body;
+                
+                if (data.isPlaying) {
+                    body.className = 'playing';
+                    console.log('Indicator: WHITE (Game is playing)');
+                } else {
+                    body.className = 'not-playing';
+                    console.log('Indicator: BLACK (Game is not playing)');
+                }
+            });
+            
+            // Request initial game state
+            socket.emit('request-game-state');
+        });
+    </script>
+</body>
+</html>
