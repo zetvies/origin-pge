@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Pertamina - Game Over</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="./config.js"></script>
     <style>
       @font-face {
         font-family: "Acumin Variable Concept";
@@ -60,6 +62,12 @@
   </div>
 
   <script>
+    // Initialize Supabase client
+    const supabaseClient = supabase.createClient(
+      config.supabaseUrl,
+      config.supabaseKey
+    );
+
     document.addEventListener("DOMContentLoaded", function () {
       // Get quiz results from localStorage
       const quizState = localStorage.getItem('quizState');
@@ -92,6 +100,9 @@
         }
         
         analysis.textContent = analysisText;
+        
+        // Submit final results to Supabase
+        submitFinalResults(score, timeLeft);
       } else {
         // Default values if no data found
         document.getElementById('final-score').textContent = 'Skor Kamu: 0/5';
@@ -104,6 +115,41 @@
       localStorage.removeItem('quizTimeLeft');
       localStorage.removeItem('quizState');
     });
+
+    // Function to submit final results to Supabase
+    async function submitFinalResults(score, timeLeft) {
+      try {
+        // Get the record ID from localStorage
+        const recordId = localStorage.getItem('supabaseRecordId');
+        if (!recordId) {
+          console.log('No Supabase record ID found, skipping update');
+          return;
+        }
+
+        console.log('Updating Supabase record:', {
+          recordId: recordId,
+          score: score,
+          timeLeft: timeLeft
+        });
+
+        const { data, error } = await supabaseClient
+          .from('pertamina')
+          .update({
+            score: score,
+            time_remaining: timeLeft,
+            total_questions: 5
+          })
+          .eq('id', recordId);
+
+        if (error) {
+          console.error('Error updating Supabase record:', error);
+        } else {
+          console.log('Successfully updated Supabase record:', data);
+        }
+      } catch (error) {
+        console.error('Exception during Supabase update:', error);
+      }
+    }
   </script>
 </body>
 </html>

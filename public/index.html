@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Pertamina - Home</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="./config.js"></script>
     <style>
       @font-face {
         font-family: "Acumin Variable Concept";
@@ -157,6 +159,12 @@
      </div>
 
      <script>
+       // Initialize Supabase client
+       const supabaseClient = supabase.createClient(
+         config.supabaseUrl,
+         config.supabaseKey
+       );
+
        document.addEventListener("DOMContentLoaded", function () {
          // Gender selection functionality
          const priaBtn = document.getElementById("pria-btn");
@@ -227,11 +235,48 @@
              // Save to localStorage
              localStorage.setItem('userProfile', JSON.stringify(formData));
              
+             // Submit to Supabase
+             submitToSupabase(formData);
+             
              // Hide form section and show mode selection
              formSection.classList.add('hidden');
              modeSelectionSection.classList.remove('hidden');
              modeSelectionSection.classList.add('flex');
            });
+         }
+
+         // Function to submit form data to Supabase
+         async function submitToSupabase(formData) {
+           try {
+             console.log('Submitting form data to Supabase:', formData);
+             
+             const { data, error } = await supabaseClient
+               .from('pertamina')
+               .insert([
+                 {
+                   nama_lengkap: formData.namaLengkap,
+                   email: formData.email,
+                   whatsapp: formData.whatsapp,
+                   jenis_kelamin: formData.jenisKelamin,
+                   timestamp: formData.timestamp
+                 }
+               ]);
+
+             if (error) {
+               console.error('Error submitting to Supabase:', error);
+               // Don't show error to user, just log it
+             } else {
+               console.log('Successfully submitted to Supabase:', data);
+               // Save the record ID for later update
+               if (data && data[0] && data[0].id) {
+                 localStorage.setItem('supabaseRecordId', data[0].id);
+                 console.log('Saved record ID:', data[0].id);
+               }
+             }
+           } catch (error) {
+             console.error('Exception during Supabase submission:', error);
+             // Don't show error to user, just log it
+           }
          }
        });
      </script>

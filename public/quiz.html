@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Pertamina - Quiz</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="./config.js"></script>
     <style>
       @font-face {
         font-family: "Acumin Variable Concept";
@@ -85,6 +87,12 @@
   </div>
 
   <script>
+    // Initialize Supabase client
+    const supabaseClient = supabase.createClient(
+      config.supabaseUrl,
+      config.supabaseKey
+    );
+
     // Quiz Questions JSON Structure (Reusable)
     const allQuestions = [
       {
