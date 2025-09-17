@@ -17,7 +17,6 @@ const PORT = process.env.PORT || 3000;
 
 // FIFO Queue for duel players
 const duelQueue = [];
-const activeDuels = new Map(); // Map to store active duel sessions
 
 // Serve static files from the public directory
 app.use(express.static(path.join(__dirname, 'public')));
@@ -67,22 +66,35 @@ io.on('connection', (socket) => {
         
         duelQueue.push(player);
         
+        // Print current queue
+        console.log('Current queue:', duelQueue.map(p => p.name));
+        console.log(`Queue length: ${duelQueue.length}`);
+        
         // Notify player they're in queue
         socket.emit('queue-status', {
             position: duelQueue.length,
             message: `Anda berada di posisi ${duelQueue.length} dalam antrian`
         });
         
-        // Try to match players
-        tryMatchPlayers();
+        // Broadcast queue update to all players
+        broadcastQueueUpdate();
+        
+        // Try to match players - DISABLED FOR NOW
+        // tryMatchPlayers();
     });
 
     // Handle leaving queue
     socket.on('leave-duel-queue', () => {
         const playerIndex = duelQueue.findIndex(p => p.id === socket.id);
         if (playerIndex !== -1) {
+            const playerName = duelQueue[playerIndex].name;
             duelQueue.splice(playerIndex, 1);
-            console.log(`Player ${socket.id} left the queue`);
+            console.log(`Player ${playerName} left the queue`);
+            console.log('Current queue:', duelQueue.map(p => p.name));
+            console.log(`Queue length: ${duelQueue.length}`);
+            
+            // Broadcast queue update to all players
+            broadcastQueueUpdate();
         }
     });
 
@@ -95,64 +107,53 @@ io.on('connection', (socket) => {
         if (playerIndex !== -1) {
             duelQueue.splice(playerIndex, 1);
             console.log(`Player ${socket.id} removed from queue due to disconnect`);
+            // Broadcast queue update to all players
+            broadcastQueueUpdate();
         }
         
-        // Handle active duel cleanup
-        for (let [duelId, duel] of activeDuels) {
-            if (duel.player1.id === socket.id || duel.player2.id === socket.id) {
-                // Notify other player about disconnection
-                const otherPlayerId = duel.player1.id === socket.id ? duel.player2.id : duel.player1.id;
-                io.to(otherPlayerId).emit('opponent-disconnected');
-                activeDuels.delete(duelId);
-                console.log(`Duel ${duelId} ended due to player disconnect`);
-            }
-        }
+        // Active duel cleanup removed since matching is disabled
     });
 });
 
-// Function to match players from queue
-function tryMatchPlayers() {
-    while (duelQueue.length >= 2) {
-        // Get first two players (FIFO)
-        const player1 = duelQueue.shift();
-        const player2 = duelQueue.shift();
-        
-        // Create duel session
-        const duelId = `duel_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-        const duel = {
-            id: duelId,
-            player1: player1,
-            player2: player2,
-            startTime: new Date(),
-            status: 'waiting'
-        };
-        
-        activeDuels.set(duelId, duel);
-        
-        // Notify both players they're matched
-        io.to(player1.id).emit('duel-matched', {
-            duelId: duelId,
-            opponent: player2,
-            playerNumber: 1
-        });
-        
-        io.to(player2.id).emit('duel-matched', {
-            duelId: duelId,
-            opponent: player1,
-            playerNumber: 2
-        });
-        
-        console.log(`Matched players: ${player1.name} vs ${player2.name} in duel ${duelId}`);
-    }
+// Function to broadcast queue update to all players
+function broadcastQueueUpdate() {
+    const player1 = duelQueue.length >= 1 ? duelQueue[0].name : null;
+    const player2 = duelQueue.length >= 2 ? duelQueue[1].name : null;
     
-    // Update remaining players' queue positions
+    io.emit('queue-update', {
+        player1: player1,
+        player2: player2,
+        queueLength: duelQueue.length
+    });
+    
+    // Send individual position updates to each player
     duelQueue.forEach((player, index) => {
-        io.to(player.id).emit('queue-status', {
+        let message, subtitle;
+        
+        if (index < 2) {
+            // Position 1 & 2: Show "Menunggu Lawan" only once
+            message = 'Menunggu Lawan';
+            subtitle = '';
+        } else {
+            // Position 3+: Show queue position (3rd position = queue position 1)
+            const queuePosition = index - 1; // 3rd position (index 2) = queue position 1
+            message = 'Menunggu Permainan Selesai';
+            subtitle = `Anda ada di posisi ${queuePosition} dalam antrian`;
+        }
+        
+        io.to(player.id).emit('position-update', {
             position: index + 1,
-            message: `Anda berada di posisi ${index + 1} dalam antrian`
+            isWaiting: index < 2,
+            message: message,
+            subtitle: subtitle
         });
     });
 }
+
+// Function to match players from queue - REMOVED FOR NOW
+// function tryMatchPlayers() {
+//     // Matching functionality removed
+// }
 
 // Start the server
 server.listen(PORT, () => {

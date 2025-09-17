@@ -42,15 +42,15 @@
     
     <!-- Waiting for opponent -->
     <div class="bg-white rounded-2xl p-6 mb-6 shadow-lg w-full">
-      <div class="text-[4svw] font-bold text-gray-800 mb-4">Menunggu Lawan</div>
-      <div class="text-[3.5svw] text-gray-700 mb-4">
+      <div id="waiting-title" class="text-[4svw] font-bold text-gray-800 mb-4">Menunggu Lawan</div>
+      <div id="waiting-subtitle" class="text-[3.5svw] text-gray-700 mb-4">
         Mencari pemain lain untuk duel...
       </div>
       <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
     </div>
     
     <!-- Player info -->
-    <div class="bg-white rounded-2xl p-4 mb-6 shadow-lg w-full">
+    <div id="player1-container" class="bg-white rounded-2xl p-4 mb-6 shadow-lg w-full">
       <div class="text-[3.5svw] font-bold text-gray-800 mb-2">Pemain 1</div>
       <div id="player1-name" class="text-[3svw] text-gray-600">Memuat...</div>
     </div>
@@ -73,7 +73,7 @@
       
       if (!userProfile) {
         // No profile data, redirect to main page
-        alert('Mohon isi data profil terlebih dahulu!');
+        console.log('No profile data found, redirecting to main page');
         window.location.href = '/';
         return;
       }
@@ -118,11 +118,90 @@
       
       // Handle queue status updates
       socket.on('queue-status', (data) => {
+        console.log('Queue status update:', data);
         const waitingDiv = document.querySelector('.text-gray-700');
         waitingDiv.textContent = data.message;
+      });
+      
+      // Handle position-based updates
+      socket.on('position-update', (data) => {
+        console.log('Position update:', data);
         
-        // Update player 2 status to show queue position
-        document.getElementById('player2-name').textContent = `Antrian posisi ${data.position}`;
+        const waitingTitle = document.getElementById('waiting-title');
+        const waitingSubtitle = document.getElementById('waiting-subtitle');
+        
+        if (data.isWaiting) {
+          // Position 1 & 2: Hide subtitle, show Pemain 1 & 2
+          waitingTitle.textContent = data.message;
+          waitingSubtitle.style.display = 'none'; // Hide subtitle
+          // Keep showing Pemain 1 & 2 sections
+          document.getElementById('player1-container').style.display = 'block';
+          document.getElementById('player2-container').style.display = 'block';
+        } else {
+          // Position 3+: Show styled title, hide Pemain 1 & 2
+          waitingTitle.textContent = data.message;
+          waitingTitle.className = 'text-[4svw] font-bold text-gray-800 mb-4'; // Apply new styling
+          waitingSubtitle.textContent = data.subtitle;
+          waitingSubtitle.style.display = 'block'; // Show subtitle
+          // Hide Pemain 1 & 2 sections
+          document.getElementById('player1-container').style.display = 'none';
+          document.getElementById('player2-container').style.display = 'none';
+        }
+      });
+      
+      // Handle queue update (shows first two players)
+      socket.on('queue-update', (data) => {
+        console.log('Queue update:', data);
+        
+        // Update player 1
+        if (data.player1) {
+          document.getElementById('player1-name').textContent = data.player1;
+        } else {
+          document.getElementById('player1-name').textContent = 'Menunggu...';
+        }
+        
+        // Update player 2
+        if (data.player2) {
+          document.getElementById('player2-name').textContent = data.player2;
+          // Remove gray styling from player 2
+          const player2Container = document.getElementById('player2-container');
+          if (player2Container) {
+            player2Container.classList.remove('bg-gray-200');
+            player2Container.classList.add('bg-white');
+            
+            const player2Title = player2Container.querySelector('.text-gray-500');
+            if (player2Title) {
+              player2Title.classList.remove('text-gray-500');
+              player2Title.classList.add('text-gray-800');
+            }
+          }
+          
+          const player2Name = document.getElementById('player2-name');
+          if (player2Name) {
+            player2Name.classList.remove('text-gray-400');
+            player2Name.classList.add('text-gray-600');
+          }
+        } else {
+          document.getElementById('player2-name').textContent = 'Menunggu...';
+          // Reset styling to gray
+          const player2Container = document.getElementById('player2-container');
+          if (player2Container) {
+            player2Container.classList.remove('bg-white');
+            player2Container.classList.add('bg-gray-200');
+            
+            const player2Title = player2Container.querySelector('.text-gray-800');
+            if (player2Title) {
+              player2Title.classList.remove('text-gray-800');
+              player2Title.classList.add('text-gray-500');
+            }
+          }
+          
+          const player2Name = document.getElementById('player2-name');
+          if (player2Name) {
+            player2Name.classList.remove('text-gray-600');
+            player2Name.classList.add('text-gray-400');
+          }
+        }
       });
       
       // Handle duel match found
@@ -152,16 +231,15 @@
         
         // Show duel starting message
         setTimeout(() => {
-          alert(`Duel dimulai! Anda adalah Pemain ${data.playerNumber}.`);
-          // Here you would typically redirect to the actual duel game
-          // For now, we'll just show a message
+          console.log(`Duel dimulai! Anda adalah Pemain ${data.playerNumber}.`);
           console.log(`Starting duel ${data.duelId} as player ${data.playerNumber}`);
+          // Here you would typically redirect to the actual duel game
         }, 1000);
       });
       
       // Handle opponent disconnection
       socket.on('opponent-disconnected', () => {
-        alert('Lawan telah keluar dari duel. Kembali ke antrian...');
+        console.log('Lawan telah keluar dari duel. Kembali ke antrian...');
         window.location.reload();
       });
       
