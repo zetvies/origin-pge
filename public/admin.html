@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Pertamina Geothermal Energy - Admin</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="./config.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+      @font-face {
+        font-family: "Acumin Variable Concept";
+        src: url("./assets/font/Acumin-Variable-Concept.ttf") format("truetype");
+        font-weight: normal;
+        font-style: normal;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: 'Acumin Variable Concept', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        background: linear-gradient(
+          to bottom,
+          #265e7d 0%,
+          #2b7393 35%,
+          #6eaf67 100%
+        );
+        color: black;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        min-height: 100vh;
+      }
+
+      .container {
+        width: 90%;
+        max-width: 1200px;
+        margin: 20px auto;
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 20px;
+        padding: 30px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+        flex-wrap: wrap;
+        gap: 20px;
+        position: relative;
+        z-index: 2;
+      }
+
+      .logo {
+        height: 60px;
+        max-width: 100%;
+      }
+
+      .header h1 {
+        margin: 0;
+        font-size: 2.5rem;
+        color: #265e7d;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      .filters {
+        display: flex;
+        gap: 20px;
+        margin-bottom: 30px;
+        flex-wrap: wrap;
+        position: relative;
+        z-index: 2;
+        background: rgba(255, 255, 255, 0.95);
+        padding: 20px;
+        border-radius: 15px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+
+      .filter-group {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        flex: 1;
+        min-width: 200px;
+      }
+
+      .filter-group label {
+        white-space: nowrap;
+        color: #265e7d;
+        font-weight: bold;
+        font-size: 1.1rem;
+      }
+
+      input[type="date"], select {
+        padding: 12px;
+        border: 2px solid #265e7d;
+        border-radius: 8px;
+        font-family: 'Acumin Variable Concept', sans-serif;
+        background-color: white;
+        width: 100%;
+        min-width: 150px;
+        font-size: 1rem;
+        color: #265e7d;
+      }
+
+      button {
+        background: linear-gradient(135deg, #265e7d, #2b7393);
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-family: 'Acumin Variable Concept', sans-serif;
+        white-space: nowrap;
+        font-size: 1.1rem;
+        font-weight: bold;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 8px rgba(38, 94, 125, 0.3);
+      }
+
+      button:hover {
+        background: linear-gradient(135deg, #2b7393, #6eaf67);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(38, 94, 125, 0.4);
+      }
+
+      button:disabled {
+        background-color: #ccc;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+      }
+
+      .table-container {
+        flex: 1;
+        min-height: 0;
+        display: flex;
+        flex-direction: column;
+        position: relative;
+        overflow: auto;
+        width: 100%;
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 15px;
+        padding: 20px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        position: relative;
+        z-index: 2;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+        table-layout: fixed;
+      }
+
+      thead {
+        position: sticky;
+        top: 0;
+        background: linear-gradient(135deg, #265e7d, #2b7393);
+        z-index: 1;
+        border-radius: 8px 8px 0 0;
+        overflow: hidden;
+      }
+
+      tbody {
+        display: table-row-group;
+      }
+
+      tbody tr {
+        display: table-row;
+      }
+
+      th, td {
+        padding: 15px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+        word-wrap: break-word;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      th {
+        background: linear-gradient(135deg, #265e7d, #2b7393);
+        font-weight: bold;
+        color: white;
+        font-size: 1.1rem;
+      }
+
+      tr:hover {
+        background-color: rgba(38, 94, 125, 0.1);
+      }
+
+      .pagination {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 20px;
+        margin-top: 30px;
+        padding: 20px;
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 15px;
+        flex-wrap: wrap;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        position: relative;
+        z-index: 2;
+      }
+
+      .pagination select {
+        padding: 12px;
+        min-width: 120px;
+        border: 2px solid #265e7d;
+        border-radius: 8px;
+        font-family: 'Acumin Variable Concept', sans-serif;
+        background-color: white;
+        color: #265e7d;
+        font-size: 1rem;
+      }
+
+      .pagination-info {
+        font-size: 1rem;
+        color: #265e7d;
+        text-align: center;
+        font-weight: bold;
+      }
+
+      /* Column widths for different screen sizes */
+      @media screen and (min-width: 1200px) {
+        th:nth-child(1), td:nth-child(1) { width: 8%; } /* Rank */
+        th:nth-child(2), td:nth-child(2) { width: 18%; } /* Name */
+        th:nth-child(3), td:nth-child(3) { width: 20%; } /* Email */
+        th:nth-child(4), td:nth-child(4) { width: 15%; } /* WhatsApp */
+        th:nth-child(5), td:nth-child(5) { width: 10%; } /* Gender */
+        th:nth-child(6), td:nth-child(6) { width: 10%; } /* Time Remaining */
+        th:nth-child(7), td:nth-child(7) { width: 10%; } /* Score */
+        th:nth-child(8), td:nth-child(8) { width: 9%; } /* Date */
+      }
+
+      @media screen and (max-width: 1199px) {
+        th:nth-child(1), td:nth-child(1) { width: 8%; } /* Rank */
+        th:nth-child(2), td:nth-child(2) { width: 17%; } /* Name */
+        th:nth-child(3), td:nth-child(3) { width: 20%; } /* Email */
+        th:nth-child(4), td:nth-child(4) { width: 15%; } /* WhatsApp */
+        th:nth-child(5), td:nth-child(5) { width: 10%; } /* Gender */
+        th:nth-child(6), td:nth-child(6) { width: 10%; } /* Time Remaining */
+        th:nth-child(7), td:nth-child(7) { width: 10%; } /* Score */
+        th:nth-child(8), td:nth-child(8) { width: 10%; } /* Date */
+      }
+
+      @media screen and (max-width: 768px) {
+        .container {
+          padding: 20px;
+          margin: 10px;
+          width: 95%;
+        }
+
+        .header h1 {
+          font-size: 2rem;
+        }
+
+        .filters {
+          flex-direction: column;
+          gap: 15px;
+        }
+
+        .filter-group {
+          min-width: 100%;
+        }
+
+        .table-container {
+          overflow-x: auto;
+          -webkit-overflow-scrolling: touch;
+          max-height: calc(100vh - 400px);
+        }
+
+        table {
+          min-width: 800px;
+        }
+
+        tbody {
+          display: table-row-group;
+        }
+
+        th:nth-child(1), td:nth-child(1) { width: 8%; } /* Rank */
+        th:nth-child(2), td:nth-child(2) { width: 15%; } /* Name */
+        th:nth-child(3), td:nth-child(3) { width: 20%; } /* Email */
+        th:nth-child(4), td:nth-child(4) { width: 15%; } /* WhatsApp */
+        th:nth-child(5), td:nth-child(5) { width: 12%; } /* Gender */
+        th:nth-child(6), td:nth-child(6) { width: 10%; } /* Time Remaining */
+        th:nth-child(7), td:nth-child(7) { width: 10%; } /* Score */
+        th:nth-child(8), td:nth-child(8) { width: 10%; } /* Date */
+
+        th, td {
+          padding: 10px;
+          font-size: 14px;
+          white-space: nowrap;
+        }
+
+        .pagination {
+          flex-direction: column;
+          gap: 15px;
+        }
+
+        .pagination select {
+          width: 100%;
+        }
+
+        button {
+          width: 100%;
+        }
+      }
+
+      @media screen and (max-width: 480px) {
+        body {
+          padding: 5px;
+        }
+
+        .container {
+          padding: 15px;
+          margin: 5px;
+          width: 98%;
+        }
+
+        .header h1 {
+          font-size: 1.5rem;
+        }
+
+        th:nth-child(1), td:nth-child(1) { width: 10%; } /* Rank */
+        th:nth-child(2), td:nth-child(2) { width: 20%; } /* Name */
+        th:nth-child(3), td:nth-child(3) { width: 25%; } /* Email */
+        th:nth-child(4), td:nth-child(4) { width: 15%; } /* WhatsApp */
+        th:nth-child(5), td:nth-child(5) { width: 15%; } /* Gender */
+        th:nth-child(6), td:nth-child(6) { width: 15%; } /* Time Remaining */
+        th:nth-child(7), td:nth-child(7) { width: 15%; } /* Score */
+        th:nth-child(8), td:nth-child(8) { width: 10%; } /* Date */
+
+        th, td {
+          padding: 8px;
+          font-size: 12px;
+        }
+
+        .pagination-info {
+          font-size: 12px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <img src="./assets/pertamina-geothermal.svg" alt="Pertamina Geothermal Energy Logo" class="logo">
+        <h1>PGE Quiz Leaderboard Admin</h1>
+      </div>
+
+      <div class="filters">
+        <div class="filter-group">
+          <label for="startDate">Start Date:</label>
+          <input type="date" id="startDate">
+        </div>
+        <div class="filter-group">
+          <label for="endDate">End Date:</label>
+          <input type="date" id="endDate">
+        </div>
+        <div class="filter-group">
+          <label for="sortBy">Sort By:</label>
+          <select id="sortBy" onchange="applyFilters()">
+            <option value="score">Score (High to Low) + Time Remaining</option>
+            <option value="score_asc">Score (Low to High) + Time Remaining</option>
+            <option value="time_remaining">Time Remaining (High to Low)</option>
+            <option value="time_remaining_asc">Time Remaining (Low to High)</option>
+            <option value="gender">Gender</option>
+            <option value="date">Date (Newest First)</option>
+            <option value="date_asc">Date (Oldest First)</option>
+          </select>
+        </div>
+        <button onclick="applyFilters()">Apply Filters</button>
+      </div>
+
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Rank</th>
+              <th>Name</th>
+              <th>Email</th>
+              <th>WhatsApp</th>
+              <th>Gender</th>
+              <th>Time Remaining</th>
+              <th>Score</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+          <tbody id="leaderboardTable">
+            <tr>
+              <td colspan="8" style="text-align: center; padding: 40px;">
+                <div style="font-size: 1.2rem; color: #666;">Loading leaderboard data...</div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        
+        <!-- Sorting Information -->
+        <div style="margin-top: 15px; padding: 10px; background: rgba(38, 94, 125, 0.1); border-radius: 8px; font-size: 0.9rem; color: #265e7d;">
+          <strong>Sorting Information:</strong>
+          <ul style="margin: 5px 0; padding-left: 20px;">
+            <li><strong>Score sorting:</strong> Primary sort by score (as integer), secondary sort by time remaining (as integer) - tiebreaker</li>
+            <li><strong>Time Remaining sorting:</strong> Primary sort by time remaining (as integer), secondary sort by score (as integer) - tiebreaker</li>
+            <li><strong>Client-side sorting:</strong> All numeric sorting is done in the browser for proper integer comparison</li>
+            <li><strong>Data consistency:</strong> Server returns data ordered by creation date for consistent pagination</li>
+            <li><strong>Other sorts:</strong> Single field sorting only</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="pagination">
+        <button onclick="previousPage()" id="prevButton">Previous</button>
+        <select id="pageSelect" onchange="goToPage()">
+          <!-- Page options will be populated by JavaScript -->
+        </select>
+        <button onclick="nextPage()" id="nextButton">Next</button>
+        <span class="pagination-info" id="paginationInfo"></span>
+      </div>
+    </div>
+
+    <script>
+      // Initialize Supabase client
+      let supabaseClient;
+      
+      try {
+        supabaseClient = supabase.createClient(
+          config.supabaseUrl,
+          config.supabaseKey
+        );
+        console.log("Supabase client initialized successfully");
+        console.log("URL:", config.supabaseUrl);
+      } catch (error) {
+        console.error("Error initializing Supabase client:", error);
+      }
+
+      // Pagination settings
+      const ITEMS_PER_PAGE = 100;
+      let currentPage = 1;
+      let totalPages = 1;
+      let currentFilters = {
+        startDate: null,
+        endDate: null,
+        sortBy: 'score'
+      };
+
+      // Set default dates (last 7 days)
+      function setDefaultDates() {
+        const endDate = new Date();
+        const startDate = new Date();
+        startDate.setDate(startDate.getDate() - 7);
+
+        // Format dates for input fields (YYYY-MM-DD)
+        document.getElementById('startDate').value = startDate.toISOString().split('T')[0];
+        document.getElementById('endDate').value = endDate.toISOString().split('T')[0];
+
+        // Set filters with proper time
+        currentFilters.startDate = startDate.toISOString().split('T')[0] + 'T00:00:00.000Z';
+        currentFilters.endDate = endDate.toISOString().split('T')[0] + 'T23:59:59.999Z';
+      }
+
+      async function fetchLeaderboard() {
+        try {
+          // Check if Supabase client is initialized
+          if (!supabaseClient) {
+            console.error("Supabase client not initialized");
+            document.getElementById('leaderboardTable').innerHTML = '<tr><td colspan="8" style="text-align: center; color: red;">Error: Supabase client not initialized</td></tr>';
+            return;
+          }
+
+          console.log("Fetching leaderboard data...");
+          console.log("Current filters:", currentFilters);
+          console.log("Sorting strategy:", currentFilters.sortBy);
+          if (currentFilters.sortBy === 'score' || currentFilters.sortBy === 'score_asc' || 
+              currentFilters.sortBy === 'time_remaining' || currentFilters.sortBy === 'time_remaining_asc') {
+            console.log("Note: Using client-side sorting for proper integer comparison");
+          }
+          
+          let query = supabaseClient
+            .from("pertamina")
+            .select("*", { count: "exact" });
+
+          // Apply date filters
+          if (currentFilters.startDate) {
+            query = query.gte('created_at', currentFilters.startDate);
+            console.log("Applied start date filter:", currentFilters.startDate);
+          }
+          if (currentFilters.endDate) {
+            query = query.lte('created_at', currentFilters.endDate);
+            console.log("Applied end date filter:", currentFilters.endDate);
+          }
+
+          // Apply basic sorting (we'll do proper numeric sorting on client side)
+          switch (currentFilters.sortBy) {
+            case 'score':
+            case 'score_asc':
+            case 'time_remaining':
+            case 'time_remaining_asc':
+              // For numeric fields, we'll sort on client side to ensure proper integer comparison
+              // Just order by created_at to get consistent results
+              query = query.order('created_at', { ascending: false });
+              break;
+            case 'gender':
+              query = query.order('jenis_kelamin', { ascending: true });
+              break;
+            case 'date':
+              query = query.order('created_at', { ascending: false });
+              break;
+            case 'date_asc':
+              query = query.order('created_at', { ascending: true });
+              break;
+          }
+
+          // Apply pagination
+          const from = (currentPage - 1) * ITEMS_PER_PAGE;
+          const to = from + ITEMS_PER_PAGE - 1;
+          
+          console.log("Executing query with pagination:", { from, to });
+          const { data, error, count } = await query.range(from, to);
+
+          if (error) {
+            console.error("Supabase query error:", error);
+            document.getElementById('leaderboardTable').innerHTML = `<tr><td colspan="8" style="text-align: center; color: red;">Error: ${error.message}</td></tr>`;
+            return;
+          }
+
+          console.log("Data received:", { data, count });
+          
+          // Log sorting information for debugging
+          console.log("Applied sorting:", currentFilters.sortBy);
+          if (data && data.length > 0) {
+            console.log("First few entries after sorting:");
+            data.slice(0, 3).forEach((entry, index) => {
+              console.log(`Entry ${index + 1}:`, {
+                name: entry.nama_lengkap,
+                score: entry.score,
+                timeRemaining: entry.time_remaining,
+                scoreAsInt: parseInt(entry.score) || 0,
+                timeAsInt: parseInt(entry.time_remaining) || 0,
+                created_at: entry.created_at
+              });
+            });
+            
+            // Additional sorting validation
+            console.log("Sorting validation - checking first 5 entries:");
+            for (let i = 0; i < Math.min(5, data.length); i++) {
+              const entry = data[i];
+              const score = parseInt(entry.score) || 0;
+              const time = parseInt(entry.time_remaining) || 0;
+              console.log(`Rank ${i + 1}: Score=${score} (${entry.score}), Time=${time} (${entry.time_remaining})`);
+            }
+            
+            // Test integer conversion
+            console.log("Integer conversion test:");
+            const testScores = ['18', '2', '100', '5'];
+            testScores.forEach(scoreStr => {
+              const scoreInt = parseInt(scoreStr) || 0;
+              console.log(`"${scoreStr}" -> ${scoreInt} (${scoreInt > 0 ? 'Valid' : 'Invalid'})`);
+            });
+          }
+
+          // Calculate total pages
+          totalPages = Math.ceil(count / ITEMS_PER_PAGE);
+
+          // Validate sorting for score-based sorts
+          if (currentFilters.sortBy === 'score' || currentFilters.sortBy === 'score_asc') {
+            validateScoreSorting(data);
+          }
+          
+          // Apply client-side sorting for numeric fields
+          if (currentFilters.sortBy === 'score' || currentFilters.sortBy === 'score_asc' || 
+              currentFilters.sortBy === 'time_remaining' || currentFilters.sortBy === 'time_remaining_asc') {
+            console.log("Applying client-side sorting for numeric fields...");
+            data.sort((a, b) => {
+              const scoreA = parseInt(a.score) || 0;
+              const scoreB = parseInt(b.score) || 0;
+              const timeA = parseInt(a.time_remaining) || 0;
+              const timeB = parseInt(b.time_remaining) || 0;
+              
+              if (currentFilters.sortBy === 'score') {
+                // Score descending, then time remaining descending
+                if (scoreA !== scoreB) return scoreB - scoreA;
+                return timeB - timeA;
+              } else if (currentFilters.sortBy === 'score_asc') {
+                // Score ascending, then time remaining ascending
+                if (scoreA !== scoreB) return scoreA - scoreB;
+                return timeA - timeB;
+              } else if (currentFilters.sortBy === 'time_remaining') {
+                // Time remaining descending, then score descending
+                if (timeA !== timeB) return timeB - timeA;
+                return scoreB - scoreA;
+              } else if (currentFilters.sortBy === 'time_remaining_asc') {
+                // Time remaining ascending, then score ascending
+                if (timeA !== timeB) return timeA - timeB;
+                return scoreA - scoreB;
+              }
+              return 0;
+            });
+            console.log("Client-side sorting completed");
+          }
+
+          // Update table
+          const tableBody = document.getElementById('leaderboardTable');
+          tableBody.innerHTML = '';
+
+          if (!data || data.length === 0) {
+            tableBody.innerHTML = '<tr><td colspan="8" style="text-align: center;">No data found for the selected criteria</td></tr>';
+            updatePagination(0);
+            return;
+          }
+
+          data.forEach((entry, index) => {
+            const row = document.createElement('tr');
+            const rank = from + index + 1;
+            const date = new Date(entry.created_at).toLocaleString();
+            
+            row.innerHTML = `
+              <td>${rank}</td>
+              <td>${entry.nama_lengkap || 'N/A'}</td>
+              <td>${entry.email || 'N/A'}</td>
+              <td>${entry.whatsapp || 'N/A'}</td>
+              <td>${entry.jenis_kelamin || 'N/A'}</td>
+              <td>${entry.time_remaining || 'N/A'}</td>
+              <td>${entry.score || 'N/A'}</td>
+              <td>${date}</td>
+            `;
+            tableBody.appendChild(row);
+          });
+
+          // Update pagination
+          updatePagination(count);
+          console.log("Table updated successfully");
+        } catch (error) {
+          console.error("Unexpected error in fetchLeaderboard:", error);
+          document.getElementById('leaderboardTable').innerHTML = `<tr><td colspan="8" style="text-align: center; color: red;">Unexpected error: ${error.message}</td></tr>`;
+        }
+      }
+
+      function updatePagination(totalItems) {
+        const pageSelect = document.getElementById('pageSelect');
+        const prevButton = document.getElementById('prevButton');
+        const nextButton = document.getElementById('nextButton');
+        const paginationInfo = document.getElementById('paginationInfo');
+
+        // Update page select options
+        pageSelect.innerHTML = '';
+        for (let i = 1; i <= totalPages; i++) {
+          const option = document.createElement('option');
+          option.value = i;
+          option.textContent = `Page ${i}`;
+          option.selected = i === currentPage;
+          pageSelect.appendChild(option);
+        }
+
+        // Update button states
+        prevButton.disabled = currentPage === 1;
+        nextButton.disabled = currentPage === totalPages;
+
+        // Update pagination info
+        const startItem = (currentPage - 1) * ITEMS_PER_PAGE + 1;
+        const endItem = Math.min(currentPage * ITEMS_PER_PAGE, totalItems);
+        paginationInfo.textContent = `Showing ${startItem}-${endItem} of ${totalItems} entries`;
+      }
+
+      function previousPage() {
+        if (currentPage > 1) {
+          currentPage--;
+          fetchLeaderboard();
+        }
+      }
+
+      function nextPage() {
+        if (currentPage < totalPages) {
+          currentPage++;
+          fetchLeaderboard();
+        }
+      }
+
+      function goToPage() {
+        const pageSelect = document.getElementById('pageSelect');
+        currentPage = parseInt(pageSelect.value);
+        fetchLeaderboard();
+      }
+
+      // Function to validate score sorting
+      function validateScoreSorting(data) {
+        if (!data || data.length < 2) return;
+        
+        const isAscending = currentFilters.sortBy === 'score_asc';
+        let isValid = true;
+        
+        for (let i = 1; i < data.length; i++) {
+          const prev = data[i - 1];
+          const curr = data[i];
+          
+          const prevScore = parseInt(prev.score) || 0;
+          const currScore = parseInt(curr.score) || 0;
+          const prevTime = parseInt(prev.time_remaining) || 0;
+          const currTime = parseInt(curr.time_remaining) || 0;
+          
+          if (isAscending) {
+            // For ascending: current should be >= previous
+            if (currScore < prevScore || (currScore === prevScore && currTime < prevTime)) {
+              isValid = false;
+              console.warn(`Sorting validation failed at index ${i}:`, {
+                prev: { score: prevScore, time: prevTime },
+                curr: { score: currScore, time: currTime }
+              });
+              break;
+            }
+          } else {
+            // For descending: current should be <= previous
+            if (currScore > prevScore || (currScore === prevScore && currTime > prevTime)) {
+              isValid = false;
+              console.warn(`Sorting validation failed at index ${i}:`, {
+                prev: { score: prevScore, time: prevTime },
+                curr: { score: currScore, time: currTime }
+              });
+              break;
+            }
+          }
+        }
+        
+        if (isValid) {
+          console.log('✅ Score sorting validation passed');
+        } else {
+          console.error('❌ Score sorting validation failed');
+        }
+      }
+
+      function applyFilters() {
+        const startDate = document.getElementById('startDate').value;
+        const endDate = document.getElementById('endDate').value;
+        const sortBy = document.getElementById('sortBy').value;
+
+        // Set start date to beginning of day (00:00:00)
+        currentFilters.startDate = startDate ? new Date(startDate + 'T00:00:00').toISOString() : null;
+        
+        // Set end date to end of day (23:59:59)
+        currentFilters.endDate = endDate ? new Date(endDate + 'T23:59:59').toISOString() : null;
+        
+        currentFilters.sortBy = sortBy;
+
+        currentPage = 1; // Reset to first page when applying new filters
+        fetchLeaderboard();
+      }
+
+      // Initialize the page
+      async function initializePage() {
+        try {
+          console.log("Initializing admin page...");
+          
+          // Wait a bit for Supabase to load
+          if (typeof supabase === 'undefined') {
+            console.log("Waiting for Supabase to load...");
+            await new Promise(resolve => setTimeout(resolve, 1000));
+          }
+          
+          if (typeof supabase === 'undefined') {
+            throw new Error("Supabase library not loaded");
+          }
+          
+          // Initialize Supabase client
+          supabaseClient = supabase.createClient(
+            config.supabaseUrl,
+            config.supabaseKey
+          );
+          console.log("Supabase client initialized successfully");
+          console.log("URL:", config.supabaseUrl);
+          
+          // Set default dates and fetch data
+          setDefaultDates();
+          await fetchLeaderboard();
+          
+        } catch (error) {
+          console.error("Error during initialization:", error);
+          document.getElementById('leaderboardTable').innerHTML = `<tr><td colspan="8" style="text-align: center; color: red;">Initialization error: ${error.message}</td></tr>`;
+        }
+      }
+
+      // Start initialization when page loads
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initializePage);
+      } else {
+        initializePage();
+      }
+    </script>
+  </body>
+</html>

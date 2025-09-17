@@ -51,6 +51,11 @@ app.get('/gameover', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'gameover.html'));
 });
 
+// Route for admin.html
+app.get('/admin', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'admin.html'));
+});
+
 // WebSocket connection handling
 io.on('connection', (socket) => {
     console.log(`User connected: ${socket.id}`);
@@ -306,5 +311,6 @@ server.listen(PORT, () => {
     console.log(`Access quiz.html at: http://localhost:${PORT}/quiz`);
     console.log(`Access duel.html at: http://localhost:${PORT}/duel`);
     console.log(`Access gameover.html at: http://localhost:${PORT}/gameover`);
+    console.log(`Access admin.html at: http://localhost:${PORT}/admin`);
 });
 
