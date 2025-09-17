@@ -251,13 +251,13 @@
              console.log('Submitting form data to Supabase:', formData);
              
              const { data, error } = await supabaseClient
-               .from('pertamina')
+               .from('saudia')
                .insert([
                  {
-                   nama_lengkap: formData.namaLengkap,
+                   name: formData.namaLengkap,
                    email: formData.email,
                    whatsapp: formData.whatsapp,
-                   jenis_kelamin: formData.jenisKelamin,
+                   gender: formData.jenisKelamin,
                    timestamp: formData.timestamp
                  }
                ]);

@@ -133,10 +133,10 @@
         });
 
         const { data, error } = await supabaseClient
-          .from('pertamina')
+          .from('saudia')
           .update({
             score: score,
-            time_remaining: timeLeft,
+            'time-remaining': timeLeft,
             total_questions: 5
           })
           .eq('id', recordId);

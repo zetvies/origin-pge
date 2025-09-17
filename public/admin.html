@@ -486,7 +486,7 @@
           }
           
           let query = supabaseClient
-            .from("pertamina")
+            .from("saudia")
             .select("*", { count: "exact" });
 
           // Apply date filters
@@ -510,7 +510,7 @@
               query = query.order('created_at', { ascending: false });
               break;
             case 'gender':
-              query = query.order('jenis_kelamin', { ascending: true });
+              query = query.order('gender', { ascending: true });
               break;
             case 'date':
               query = query.order('created_at', { ascending: false });
@@ -583,8 +583,8 @@
             data.sort((a, b) => {
               const scoreA = parseInt(a.score) || 0;
               const scoreB = parseInt(b.score) || 0;
-              const timeA = parseInt(a.time_remaining) || 0;
-              const timeB = parseInt(b.time_remaining) || 0;
+              const timeA = parseInt(a['time-remaining']) || 0;
+              const timeB = parseInt(b['time-remaining']) || 0;
               
               if (currentFilters.sortBy === 'score') {
                 // Score descending, then time remaining descending
@@ -625,11 +625,11 @@
             
             row.innerHTML = `
               <td>${rank}</td>
-              <td>${entry.nama_lengkap || 'N/A'}</td>
+              <td>${entry.name || 'N/A'}</td>
               <td>${entry.email || 'N/A'}</td>
               <td>${entry.whatsapp || 'N/A'}</td>
-              <td>${entry.jenis_kelamin || 'N/A'}</td>
-              <td>${entry.time_remaining || 'N/A'}</td>
+              <td>${entry.gender || 'N/A'}</td>
+              <td>${entry['time-remaining'] || 'N/A'}</td>
               <td>${entry.score || 'N/A'}</td>
               <td>${date}</td>
             `;
@@ -704,8 +704,8 @@
           
           const prevScore = parseInt(prev.score) || 0;
           const currScore = parseInt(curr.score) || 0;
-          const prevTime = parseInt(prev.time_remaining) || 0;
-          const currTime = parseInt(curr.time_remaining) || 0;
+          const prevTime = parseInt(prev['time-remaining']) || 0;
+          const currTime = parseInt(curr['time-remaining']) || 0;
           
           if (isAscending) {
             // For ascending: current should be >= previous
