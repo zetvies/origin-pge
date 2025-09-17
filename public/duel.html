@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Pertamina - Duel</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
     <style>
       @font-face {
         font-family: "Acumin Variable Concept";
@@ -51,12 +52,12 @@
     <!-- Player info -->
     <div class="bg-white rounded-2xl p-4 mb-6 shadow-lg w-full">
       <div class="text-[3.5svw] font-bold text-gray-800 mb-2">Pemain 1</div>
-      <div class="text-[3svw] text-gray-600">Anda</div>
+      <div id="player1-name" class="text-[3svw] text-gray-600">Memuat...</div>
     </div>
     
-    <div class="bg-gray-200 rounded-2xl p-4 mb-6 shadow-lg w-full">
+    <div id="player2-container" class="bg-gray-200 rounded-2xl p-4 mb-6 shadow-lg w-full">
       <div class="text-[3.5svw] font-bold text-gray-500 mb-2">Pemain 2</div>
-      <div class="text-[3svw] text-gray-400">Menunggu...</div>
+      <div id="player2-name" class="text-[3svw] text-gray-400">Menunggu...</div>
     </div>
     
     <!-- Back button -->
@@ -67,12 +68,113 @@
 
   <script>
     document.addEventListener("DOMContentLoaded", function () {
-      // Simulate finding opponent after 3 seconds
+      // Get player data from localStorage
+      const userProfile = localStorage.getItem('userProfile');
+      
+      if (!userProfile) {
+        // No profile data, redirect to main page
+        alert('Mohon isi data profil terlebih dahulu!');
+        window.location.href = '/';
+        return;
+      }
+      
+      const playerData = JSON.parse(userProfile);
+      
+      // Update player info display immediately
+      document.getElementById('player1-name').textContent = playerData.namaLengkap;
+      
+      // Connect to WebSocket server
+      const socket = io('http://localhost:3000');
+      
+      // Handle connection errors
+      socket.on('connect_error', (error) => {
+        console.error('WebSocket connection error:', error);
+        document.querySelector('.text-gray-700').textContent = 'Koneksi gagal. Silakan coba lagi.';
+        document.getElementById('player2-name').textContent = 'Koneksi gagal';
+      });
+      
+      socket.on('connect', () => {
+        console.log('WebSocket connected successfully');
+        document.querySelector('.text-gray-700').textContent = 'Mencari pemain lain untuk duel...';
+        document.getElementById('player2-name').textContent = 'Menunggu...';
+        
+        // Join duel queue after successful connection
+        socket.emit('join-duel-queue', {
+          name: playerData.namaLengkap,
+          email: playerData.email,
+          whatsapp: playerData.whatsapp,
+          gender: playerData.jenisKelamin
+        });
+      });
+      
+      // Fallback timeout in case connection takes too long
       setTimeout(() => {
-        // This would typically connect to a real-time system
-        console.log("Opponent found! Starting duel...");
-        // Redirect to duel game or show duel interface
-      }, 3000);
+        if (!socket.connected) {
+          console.log('WebSocket connection timeout');
+          document.querySelector('.text-gray-700').textContent = 'Koneksi timeout. Silakan refresh halaman.';
+          document.getElementById('player2-name').textContent = 'Koneksi timeout';
+        }
+      }, 5000);
+      
+      // Handle queue status updates
+      socket.on('queue-status', (data) => {
+        const waitingDiv = document.querySelector('.text-gray-700');
+        waitingDiv.textContent = data.message;
+        
+        // Update player 2 status to show queue position
+        document.getElementById('player2-name').textContent = `Antrian posisi ${data.position}`;
+      });
+      
+      // Handle duel match found
+      socket.on('duel-matched', (data) => {
+        console.log('Duel matched!', data);
+        
+        // Update UI to show opponent found
+        const waitingDiv = document.querySelector('.text-gray-700');
+        waitingDiv.textContent = `Lawan ditemukan: ${data.opponent.name}`;
+        
+        // Update player 2 info
+        document.getElementById('player2-name').textContent = data.opponent.name;
+        
+        // Remove gray styling from player 2
+        const player2Container = document.getElementById('player2-container');
+        player2Container.classList.remove('bg-gray-200');
+        player2Container.classList.add('bg-white');
+        
+        const player2Title = player2Container.querySelector('.text-gray-500');
+        player2Title.classList.remove('text-gray-500');
+        player2Title.classList.add('text-gray-800');
+        
+        // Update player 2 name styling
+        const player2Name = document.getElementById('player2-name');
+        player2Name.classList.remove('text-gray-400');
+        player2Name.classList.add('text-gray-600');
+        
+        // Show duel starting message
+        setTimeout(() => {
+          alert(`Duel dimulai! Anda adalah Pemain ${data.playerNumber}.`);
+          // Here you would typically redirect to the actual duel game
+          // For now, we'll just show a message
+          console.log(`Starting duel ${data.duelId} as player ${data.playerNumber}`);
+        }, 1000);
+      });
+      
+      // Handle opponent disconnection
+      socket.on('opponent-disconnected', () => {
+        alert('Lawan telah keluar dari duel. Kembali ke antrian...');
+        window.location.reload();
+      });
+      
+      // Handle page unload - leave queue
+      window.addEventListener('beforeunload', () => {
+        socket.emit('leave-duel-queue');
+      });
+      
+      // Handle back button
+      document.querySelector('button').addEventListener('click', () => {
+        socket.emit('leave-duel-queue');
+        window.location.href = '/';
+      });
     });
   </script>
 </body>
