@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pertamina - Game Over</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      @font-face {
+        font-family: "Acumin Variable Concept";
+        src: url("./assets/font/Acumin-Variable-Concept.ttf") format("truetype");
+        font-weight: normal;
+        font-style: normal;
+      }
+    </style>
+</head>
+<body
+  class="min-h-screen text-white text-center flex items-center justify-center font-['Acumin_Variable_Concept']"
+  style="
+    background: linear-gradient(
+      to bottom,
+      #265e7d 0%,
+      #2b7393 35%,
+      #6eaf67 100%
+    );
+  "
+>
+  <img
+    src="./assets/danantara-logo.svg"
+    class="absolute top-0 left-0 h-[6svh]"
+  />
+  
+  <div class="flex md:hidden flex-col items-center justify-center w-full max-w-[100svh] py-[8svh] px-[6svw]">
+    <img
+      src="./assets/pertamina-geothermal.svg"
+      class="h-[8svh] w-auto mb-[8svh]"
+    />
+    
+    <!-- Game Over Content -->
+    <div class="bg-white rounded-2xl p-8 mb-8 shadow-lg w-full max-w-md">
+      <div class="text-[5svw] font-black text-gray-800 mb-6">Game Selesai!</div>
+      <div id="final-score" class="text-[4svw] font-bold text-gray-700 mb-4">Skor Kamu: 0/5</div>
+      <div id="time-remaining" class="text-[4svw] font-bold text-gray-700 mb-6">Waktu Tersisa: 0 detik</div>
+      
+      <!-- Score Analysis -->
+      <div class="bg-gray-50 rounded-xl p-4 mb-6">
+        <div class="text-[3.5svw] font-bold text-gray-800 mb-2">Analisis Skor</div>
+        <div id="score-analysis" class="text-[3svw] text-gray-600">
+          <!-- Score analysis will be inserted here -->
+        </div>
+      </div>
+    </div>
+    
+    <!-- Action Buttons -->
+    <div class="w-full max-w-md space-y-4">
+      <button onclick="window.location.href='/'" class="w-full px-4 py-4 rounded-2xl bg-gray-600 text-white text-[4svw] font-bold uppercase hover:bg-gray-700 transition-colors">
+        KEMBALI KE MENU
+      </button>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      // Get quiz results from localStorage
+      const quizState = localStorage.getItem('quizState');
+      const quizTimeLeft = localStorage.getItem('quizTimeLeft');
+      
+      if (quizState) {
+        const state = JSON.parse(quizState);
+        const score = state.score || 0;
+        const totalQuestions = 5;
+        const timeLeft = quizTimeLeft ? parseInt(quizTimeLeft) : 0;
+        
+        // Update score display
+        document.getElementById('final-score').textContent = `Skor Kamu: ${score}/${totalQuestions}`;
+        document.getElementById('time-remaining').textContent = `Waktu Tersisa: ${timeLeft} detik`;
+        
+        // Score analysis
+        const analysis = document.getElementById('score-analysis');
+        let analysisText = '';
+        
+        if (score === totalQuestions) {
+          analysisText = 'Sempurna! Kamu benar-benar memahami tentang PGE dan panas bumi!';
+        } else if (score >= totalQuestions * 0.8) {
+          analysisText = 'Bagus sekali! Pengetahuan kamu tentang PGE sudah sangat baik!';
+        } else if (score >= totalQuestions * 0.6) {
+          analysisText = 'Cukup baik! Masih ada ruang untuk belajar lebih lanjut tentang PGE.';
+        } else if (score >= totalQuestions * 0.4) {
+          analysisText = 'Perlu belajar lebih banyak tentang PGE dan energi panas bumi.';
+        } else {
+          analysisText = 'Jangan menyerah! Pelajari lebih lanjut tentang PGE dan coba lagi!';
+        }
+        
+        analysis.textContent = analysisText;
+      } else {
+        // Default values if no data found
+        document.getElementById('final-score').textContent = 'Skor Kamu: 0/5';
+        document.getElementById('time-remaining').textContent = 'Waktu Tersisa: 0 detik';
+        document.getElementById('score-analysis').textContent = 'Tidak ada data quiz yang ditemukan.';
+      }
+      
+      // Clear localStorage after displaying results
+      localStorage.removeItem('gameStarted');
+      localStorage.removeItem('quizTimeLeft');
+      localStorage.removeItem('quizState');
+    });
+  </script>
+</body>
+</html>
+

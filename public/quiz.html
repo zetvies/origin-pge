@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pertamina - Quiz</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      @font-face {
+        font-family: "Acumin Variable Concept";
+        src: url("./assets/font/Acumin-Variable-Concept.ttf") format("truetype");
+        font-weight: normal;
+        font-style: normal;
+      }
+    </style>
+</head>
+<body
+  class="min-h-screen text-white text-center flex items-center justify-center font-['Acumin_Variable_Concept']"
+  style="
+    background: linear-gradient(
+      to bottom,
+      #265e7d 0%,
+      #2b7393 35%,
+      #6eaf67 100%
+    );
+  "
+>
+  <img
+    src="./assets/danantara-logo.svg"
+    class="absolute top-0 left-0 h-[6svh]"
+  />
+  
+  <div class="flex md:hidden flex-col items-center justify-center w-full max-w-[100svh] pt-[8svh] pb-[4svh] px-[6svw]">
+    <!-- Countdown Overlay -->
+    <div id="countdown-overlay" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div class="bg-white rounded-2xl p-8 text-center">
+        <div class="text-[4svw] font-bold text-gray-800 mb-4">Game akan dimulai dalam</div>
+        <div id="countdown-timer" class="text-[8svw] font-black text-red-600">3</div>
+      </div>
+    </div>
+
+
+    <!-- Alert Dialog -->
+    <div id="alert-overlay" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+      <div class="bg-white rounded-2xl p-6 text-center max-w-sm w-[90%]">
+        <div id="alert-message" class="text-[4svw] font-bold text-gray-800 mb-6"></div>
+        <button id="alert-ok-btn" class="w-full px-4 py-3 rounded-2xl bg-blue-600 text-white text-[3.5svw] font-bold uppercase hover:bg-blue-700 transition-colors">
+          OK
+        </button>
+      </div>
+    </div>
+
+    <!-- QUIZ -->
+    <div class="w-full max-w-md">
+      <!-- Timer -->
+      <div class="bg-white rounded-2xl p-4 mb-6 text-center w-fit absolute top-4 right-4">
+        <div class="text-[3.5svw] font-bold text-gray-800">Waktu Tersisa</div>
+        <div id="timer" class="text-[4svw] font-black text-red-600">02:00</div>
+      </div>
+      
+      <!-- Question Container -->
+      <div class="bg-white rounded-2xl p-6 mb-6 shadow-lg">
+        <div id="question-counter" class="text-[4svw] font-bold text-gray-800 mb-4 text-center">Pertanyaan 1/5</div>
+        <div id="question-text" class="text-[4svw] text-gray-700 text-center mb-6">
+          Berapa total kapasitas terpasang panas bumi yang dikelola PGE?
+        </div>
+      </div>
+      
+      <!-- Answer Options -->
+      <div class="space-y-4">
+        <button type="button" class="answer-btn w-full bg-white rounded-2xl p-4 text-left shadow-lg hover:bg-gray-50 transition-all duration-300 border-2 border-transparent" data-answer="A">
+          <span class="text-[4svw] font-bold text-gray-800">A. 727 Mega Watt</span>
+        </button>
+        <button type="button" class="answer-btn w-full bg-white rounded-2xl p-4 text-left shadow-lg hover:bg-gray-50 transition-all duration-300 border-2 border-transparent" data-answer="B">
+          <span class="text-[4svw] font-bold text-gray-800">B. 1.205 Mega Watt</span>
+        </button>
+        <button type="button" class="answer-btn w-full bg-white rounded-2xl p-4 text-left shadow-lg hover:bg-gray-50 transition-all duration-300 border-2 border-transparent" data-answer="C">
+          <span class="text-[4svw] font-bold text-gray-800">C. 1.932 Mega Watt</span>
+        </button>
+        <button type="button" class="answer-btn w-full bg-white rounded-2xl p-4 text-left shadow-lg hover:bg-gray-50 transition-all duration-300 border-2 border-transparent" data-answer="D">
+          <span class="text-[4svw] font-bold text-gray-800">D. 3.000 Mega Watt</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Quiz Questions JSON Structure (Reusable)
+    const allQuestions = [
+      {
+        id: 1,
+        question: "PGE berdiri pada tahun berapa?",
+        options: [
+          { letter: "A", text: "1996", correct: false },
+          { letter: "B", text: "2000", correct: false },
+          { letter: "C", text: "2006", correct: true },
+          { letter: "D", text: "2010", correct: false }
+        ],
+        correctAnswer: "C"
+      },
+      {
+        id: 2,
+        question: "Apa kepanjangan dari singkatan \"PGE\"?",
+        options: [
+          { letter: "A", text: "Pertamina Gas Energi", correct: false },
+          { letter: "B", text: "Pertamina Geothermal Energy", correct: true },
+          { letter: "C", text: "Pertamina Green Electricity", correct: false },
+          { letter: "D", text: "Pertamina Global Enterprise", correct: false }
+        ],
+        correctAnswer: "B"
+      },
+      {
+        id: 3,
+        question: "Indonesia menempati peringkat ke berapa di dunia untuk kapasitas terpasang panas bumi?",
+        options: [
+          { letter: "A", text: "Pertama", correct: false },
+          { letter: "B", text: "Kedua", correct: true },
+          { letter: "C", text: "Ketiga", correct: false },
+          { letter: "D", text: "Keempat", correct: false }
+        ],
+        correctAnswer: "B"
+      },
+      {
+        id: 4,
+        question: "Berapa total kapasitas terpasang panas bumi yang dikelola PGE?",
+        options: [
+          { letter: "A", text: "727 MW", correct: false },
+          { letter: "B", text: "1.205 MW", correct: false },
+          { letter: "C", text: "1.932 MW", correct: true },
+          { letter: "D", text: "3.000 MW", correct: false }
+        ],
+        correctAnswer: "C"
+      },
+      {
+        id: 5,
+        question: "Dari total kapasitas panas bumi di Indonesia, berapa persen yang dikelola di wilayah kerja PGE?",
+        options: [
+          { letter: "A", text: "50%", correct: false },
+          { letter: "B", text: "60%", correct: false },
+          { letter: "C", text: "70%", correct: true },
+          { letter: "D", text: "80%", correct: false }
+        ],
+        correctAnswer: "C"
+      },
+      {
+        id: 6,
+        question: "Apa nama wilayah kerja panas bumi PGE di Sulawesi Utara yang juga dikembangkan untuk wisata?",
+        options: [
+          { letter: "A", text: "Kotamobagu", correct: false },
+          { letter: "B", text: "Lahendong", correct: true },
+          { letter: "C", text: "Way Panas", correct: false },
+          { letter: "D", text: "Seulawah", correct: false }
+        ],
+        correctAnswer: "B"
+      },
+      {
+        id: 7,
+        question: "Apa salah satu hasil sampingan inovasi PGE selain listrik panas bumi?",
+        options: [
+          { letter: "A", text: "Batu bara cair", correct: false },
+          { letter: "B", text: "Hidrogen hijau", correct: true },
+          { letter: "C", text: "Minyak bumi", correct: false },
+          { letter: "D", text: "Gas alam", correct: false }
+        ],
+        correctAnswer: "B"
+      },
+      {
+        id: 8,
+        question: "PGE berhasil meraih berapa kali penghargaan Gold PROPER secara berturut-turut?",
+        options: [
+          { letter: "A", text: "10 kali", correct: false },
+          { letter: "B", text: "12 kali", correct: false },
+          { letter: "C", text: "14 kali", correct: true },
+          { letter: "D", text: "16 kali", correct: false }
+        ],
+        correctAnswer: "C"
+      },
+      {
+        id: 9,
+        question: "Dengan memanfaatkan panas bumi, berapa banyak emisi CO2 yang berhasil dihindari PGE setiap tahun?",
+        options: [
+          { letter: "A", text: "1 juta ton", correct: false },
+          { letter: "B", text: "5 juta ton", correct: false },
+          { letter: "C", text: "9,76 juta ton", correct: true },
+          { letter: "D", text: "15 juta ton", correct: false }
+        ],
+        correctAnswer: "C"
+      }
+    ];
+
+    // Function to shuffle array and get 5 random questions
+    function shuffleArray(array) {
+      const shuffled = [...array];
+      for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+      }
+      return shuffled.slice(0, 5);
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+      // Quiz functionality
+      let currentQuestionIndex = 0;
+      let timeLeft = 120; // 120 seconds
+      let timerInterval;
+      let selectedAnswer = null;
+      let gameStarted = false;
+      let quizQuestions = [];
+      let quizState = {
+        currentQuestion: 0,
+        answers: [],
+        score: 0
+      };
+
+      // Check if game has already started
+      const savedGameState = localStorage.getItem('gameStarted');
+      const savedTimeLeft = localStorage.getItem('quizTimeLeft');
+      const savedQuizState = localStorage.getItem('quizState');
+      
+      if (savedGameState === 'true' && savedTimeLeft && savedQuizState) {
+        // Game already started, restore state
+        gameStarted = true;
+        timeLeft = parseInt(savedTimeLeft);
+        quizState = JSON.parse(savedQuizState);
+        currentQuestionIndex = quizState.currentQuestion;
+        hideCountdown();
+        initializeQuiz();
+      } else {
+        // First time loading, show countdown
+        showCountdown();
+      }
+
+      // Countdown functionality
+      function showCountdown() {
+        const countdownOverlay = document.getElementById('countdown-overlay');
+        const countdownTimer = document.getElementById('countdown-timer');
+        let countdown = 3;
+
+        countdownTimer.textContent = countdown;
+
+        const countdownInterval = setInterval(() => {
+          countdown--;
+          countdownTimer.textContent = countdown;
+
+          if (countdown <= 0) {
+            clearInterval(countdownInterval);
+            hideCountdown();
+            startGame();
+          }
+        }, 1000);
+      }
+
+      function hideCountdown() {
+        const countdownOverlay = document.getElementById('countdown-overlay');
+        if (countdownOverlay) {
+          countdownOverlay.style.display = 'none';
+        }
+      }
+
+      function startGame() {
+        gameStarted = true;
+        quizQuestions = shuffleArray(allQuestions);
+        quizState = {
+          currentQuestion: 0,
+          answers: [],
+          score: 0
+        };
+        localStorage.setItem('gameStarted', 'true');
+        localStorage.setItem('quizState', JSON.stringify(quizState));
+        initializeQuiz();
+      }
+
+      // Timer functionality
+      function startTimer() {
+        timerInterval = setInterval(() => {
+          timeLeft--;
+          updateTimerDisplay();
+          
+          // Save current time to localStorage
+          localStorage.setItem('quizTimeLeft', timeLeft.toString());
+          
+          if (timeLeft <= 0) {
+            clearInterval(timerInterval);
+            handleTimeUp();
+          }
+        }, 1000);
+      }
+
+      function updateTimerDisplay() {
+        const timerElement = document.getElementById("timer");
+        if (timerElement) {
+          const minutes = Math.floor(timeLeft / 60);
+          const seconds = timeLeft % 60;
+          timerElement.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+      }
+
+      function handleTimeUp() {
+        // Clear game state when time is up
+        localStorage.removeItem('gameStarted');
+        localStorage.removeItem('quizTimeLeft');
+        localStorage.removeItem('quizState');
+        // Redirect to game over page
+        window.location.href = '/gameover';
+      }
+
+      // Answer selection functionality
+      function selectAnswer(answerBtn) {
+        if (selectedAnswer) return; // Prevent multiple selections
+        
+        selectedAnswer = answerBtn.dataset.answer;
+        const currentQuestion = quizQuestions[currentQuestionIndex];
+        const isCorrect = selectedAnswer === currentQuestion.correctAnswer;
+        
+        // Disable all buttons
+        document.querySelectorAll('.answer-btn').forEach(btn => {
+          btn.disabled = true;
+        });
+
+        // Show feedback
+        showAnswerFeedback(answerBtn, isCorrect);
+        
+        // Update quiz state
+        quizState.answers.push({
+          questionId: currentQuestion.id,
+          selectedAnswer: selectedAnswer,
+          correctAnswer: currentQuestion.correctAnswer,
+          isCorrect: isCorrect
+        });
+        
+        if (isCorrect) {
+          quizState.score++;
+        }
+        
+        // Save state
+        localStorage.setItem('quizState', JSON.stringify(quizState));
+        
+        // Move to next question after delay
+        setTimeout(() => {
+          nextQuestion();
+        }, 2000);
+      }
+
+      function showAnswerFeedback(selectedBtn, isCorrect) {
+        // Remove previous styling
+        document.querySelectorAll('.answer-btn').forEach(btn => {
+          btn.classList.remove('border-blue-600', 'bg-blue-50', 'border-green-500', 'bg-green-100', 'border-red-500', 'bg-red-100');
+          btn.classList.add('border-transparent');
+        });
+
+        // Add feedback styling
+        if (isCorrect) {
+          selectedBtn.classList.add('border-green-500', 'bg-green-100');
+          // Add check icon
+          const icon = document.createElement('span');
+          icon.innerHTML = '✓';
+          icon.className = 'text-green-600 text-[5svw] font-bold ml-2';
+          selectedBtn.appendChild(icon);
+        } else {
+          selectedBtn.classList.add('border-red-500', 'bg-red-100');
+          // Add X icon
+          const icon = document.createElement('span');
+          icon.innerHTML = '✗';
+          icon.className = 'text-red-600 text-[5svw] font-bold ml-2';
+          selectedBtn.appendChild(icon);
+          
+          // Highlight correct answer
+          const correctBtn = document.querySelector(`[data-answer="${quizQuestions[currentQuestionIndex].correctAnswer}"]`);
+          correctBtn.classList.add('border-green-500', 'bg-green-100');
+          const correctIcon = document.createElement('span');
+          correctIcon.innerHTML = '✓';
+          correctIcon.className = 'text-green-600 text-[5svw] font-bold ml-2';
+          correctBtn.appendChild(correctIcon);
+        }
+      }
+
+      function nextQuestion() {
+        currentQuestionIndex++;
+        quizState.currentQuestion = currentQuestionIndex;
+        
+        if (currentQuestionIndex >= quizQuestions.length) {
+          // Quiz completed
+          endQuiz();
+        } else {
+          // Load next question
+          loadQuestion();
+        }
+      }
+
+      function loadQuestion() {
+        const question = quizQuestions[currentQuestionIndex];
+        
+        // Update question counter
+        document.getElementById('question-counter').textContent = `Pertanyaan ${currentQuestionIndex + 1}/5`;
+        
+        // Update question text
+        document.getElementById('question-text').textContent = question.question;
+        
+        // Update answer options
+        const answerBtns = document.querySelectorAll('.answer-btn');
+        answerBtns.forEach((btn, index) => {
+          btn.disabled = false;
+          btn.classList.remove('border-blue-600', 'bg-blue-50', 'border-green-500', 'bg-green-100', 'border-red-500', 'bg-red-100');
+          btn.classList.add('border-transparent');
+          
+          // Clear previous icons
+          const existingIcon = btn.querySelector('span:last-child');
+          if (existingIcon && (existingIcon.textContent === '✓' || existingIcon.textContent === '✗')) {
+            existingIcon.remove();
+          }
+          
+          // Update text
+          const span = btn.querySelector('span:first-child');
+          span.textContent = `${question.options[index].letter}. ${question.options[index].text}`;
+          btn.dataset.answer = question.options[index].letter;
+        });
+        
+        selectedAnswer = null;
+      }
+
+      function endQuiz() {
+        // Stop timer
+        clearInterval(timerInterval);
+        
+        // Redirect to game over page
+        window.location.href = '/gameover';
+      }
+
+      // Popup functions
+      function showAlert(message) {
+        const alertOverlay = document.getElementById('alert-overlay');
+        const alertMessage = document.getElementById('alert-message');
+        const alertOkBtn = document.getElementById('alert-ok-btn');
+        
+        alertMessage.textContent = message;
+        alertOverlay.classList.remove('hidden');
+        
+        alertOkBtn.onclick = function() {
+          alertOverlay.classList.add('hidden');
+        };
+      }
+
+
+      // Add event listeners to answer buttons
+      document.querySelectorAll('.answer-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+          selectAnswer(this);
+        });
+      });
+
+      // Initialize quiz
+      function initializeQuiz() {
+        updateTimerDisplay();
+        startTimer();
+        loadQuestion();
+      }
+    });
+  </script>
+</body>
+</html>

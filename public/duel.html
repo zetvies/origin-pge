@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pertamina - Duel</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      @font-face {
+        font-family: "Acumin Variable Concept";
+        src: url("./assets/font/Acumin-Variable-Concept.ttf") format("truetype");
+        font-weight: normal;
+        font-style: normal;
+      }
+    </style>
+</head>
+<body
+  class="min-h-screen text-white text-center flex items-center justify-center font-['Acumin_Variable_Concept']"
+  style="
+    background: linear-gradient(
+      to bottom,
+      #265e7d 0%,
+      #2b7393 35%,
+      #6eaf67 100%
+    );
+  "
+>
+  <img
+    src="./assets/danantara-logo.svg"
+    class="absolute top-0 left-0 h-[6svh]"
+  />
+  
+  <div class="flex md:hidden flex-col items-center justify-center w-full max-w-[100svh] pt-[8svh] pb-[4svh] px-[6svw]">
+    <img
+      src="./assets/pertamina-geothermal.svg"
+      class="h-[8svh] w-auto mb-[8svh]"
+    />
+    <div class="text-[5svw] font-black mb-[4svh]">
+      Geothermal Challenge
+    </div>
+    
+    <!-- Waiting for opponent -->
+    <div class="bg-white rounded-2xl p-6 mb-6 shadow-lg w-full">
+      <div class="text-[4svw] font-bold text-gray-800 mb-4">Menunggu Lawan</div>
+      <div class="text-[3.5svw] text-gray-700 mb-4">
+        Mencari pemain lain untuk duel...
+      </div>
+      <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+    </div>
+    
+    <!-- Player info -->
+    <div class="bg-white rounded-2xl p-4 mb-6 shadow-lg w-full">
+      <div class="text-[3.5svw] font-bold text-gray-800 mb-2">Pemain 1</div>
+      <div class="text-[3svw] text-gray-600">Anda</div>
+    </div>
+    
+    <div class="bg-gray-200 rounded-2xl p-4 mb-6 shadow-lg w-full">
+      <div class="text-[3.5svw] font-bold text-gray-500 mb-2">Pemain 2</div>
+      <div class="text-[3svw] text-gray-400">Menunggu...</div>
+    </div>
+    
+    <!-- Back button -->
+    <button onclick="window.location.href='/'" class="w-full px-4 py-4 rounded-2xl bg-gray-600 text-white text-[4svw] font-bold uppercase hover:bg-gray-700 transition-colors">
+      KEMBALI
+    </button>
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      // Simulate finding opponent after 3 seconds
+      setTimeout(() => {
+        // This would typically connect to a real-time system
+        console.log("Opponent found! Starting duel...");
+        // Redirect to duel game or show duel interface
+      }, 3000);
+    });
+  </script>
+</body>
+</html>
+

@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pertamina - Home</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      @font-face {
+        font-family: "Acumin Variable Concept";
+        src: url("./assets/font/Acumin-Variable-Concept.ttf") format("truetype");
+        font-weight: normal;
+        font-style: normal;
+      }
+    </style>
+  </head>
+  <body
+    class="min-h-screen text-white text-center flex items-center justify-center font-['Acumin_Variable_Concept']"
+    style="
+      background: linear-gradient(
+        to bottom,
+        #265e7d 0%,
+        #2b7393 35%,
+        #6eaf67 100%
+      );
+    "
+  >
+    <img
+      src="./assets/danantara-logo.svg"
+      class="absolute top-0 left-0 h-[6svh]"
+    />
+    <div
+      class="flex-col items-center justify-center w-full  pt-[6svh] pb-[4svh] px-[8svw] hidden md:flex"
+    >
+      <img
+        src="./assets/pertamina-geothermal.svg"
+        class="h-[20svh] w-auto mb-[4svh]"
+      />
+      <div class="text-[4svh] font-black mb-[2svh]">
+        Silakan akses melalui perangkat mobile.
+      </div>
+    </div>
+    <div
+    id="form"
+      class="flex md:hidden flex-col items-center justify-center w-full max-w-[100svh] py-[8svh] px-[6svw]"
+    >
+      <img
+        src="./assets/pertamina-geothermal.svg"
+        class="h-[8svh] w-auto mb-[4svh]"
+      />
+      <div class="text-[5svw] font-black mb-[2svh]">
+        Selamat Datang di Game Interaktif<br />
+        Booth PGE IIGC 2025
+      </div>
+      <div class="text-[4.5svw] mb-[4svh]">
+        Silahkan isi data profil berikut:
+      </div>
+
+      <form class="w-full max-w-md flex flex-col items-center">
+        <div class="flex flex-col space-y-4 w-[80%]">
+          <!-- Nama Lengkap -->
+          <div class="space-y-1">
+            <label class="block text-white text-left text-[3.5svw]"
+              >Nama Lengkap</label
+            >
+            <input
+              type="text"
+              class="w-full px-4 py-3 rounded-2xl bg-white text-gray-800 text-[4svw] border-0 focus:outline-none focus:ring-2 focus:ring-white"
+            />
+          </div>
+
+          <!-- Alamat E-Mail -->
+          <div class="space-y-1">
+            <label class="block text-white text-left text-[3.5svw]"
+              >Alamat E-Mail</label
+            >
+            <input
+              type="email"
+              class="w-full px-4 py-3 rounded-2xl bg-white text-gray-800 text-[4svw] border-0 focus:outline-none focus:ring-2 focus:ring-white"
+            />
+          </div>
+
+          <!-- Nomor Whatsapp -->
+          <div class="space-y-1">
+            <label class="block text-white text-left text-[3.5svw]"
+              >Nomor Whatsapp</label
+            >
+            <input
+              type="tel"
+              class="w-full px-4 py-3 rounded-2xl bg-white text-gray-800 text-[4svw] border-0 focus:outline-none focus:ring-2 focus:ring-white"
+            />
+          </div>
+
+          <!-- Jenis Kelamin -->
+          <div class="space-y-1">
+            <label class="block text-white text-left text-[3.5svw]"
+              >Jenis Kelamin</label
+            >
+            <div class="flex space-x-4">
+              <button
+                type="button"
+                id="pria-btn"
+                class="flex-1 px-4 py-3 rounded-2xl bg-white text-blue-600 text-[4svw] font-bold border-2 border-transparent hover:bg-gray-100 transition-all duration-300"
+              >
+                Pria
+              </button>
+              <button
+                type="button"
+                id="wanita-btn"
+                class="flex-1 px-4 py-3 rounded-2xl bg-white text-blue-600 text-[4svw] font-bold border-2 border-transparent hover:bg-gray-100 transition-all duration-300"
+              >
+                Wanita
+              </button>
+            </div>
+          </div>
+        </div>
+         <!-- Submit Button -->
+         <button
+           type="submit"
+           id="submit-btn"
+           class="w-[60%] px-4 py-4 rounded-2xl bg-red-600 text-white text-[4svw] font-bold uppercase hover:bg-red-700 transition-colors mt-[4svh]"
+         >
+           SUBMIT
+         </button>
+      </form>
+    </div>
+    <div
+    id="mode-selection"
+      class="hidden md:hidden flex-col items-center justify-center w-full max-w-[100svh] py-[8svh] px-[6svw]"
+    >
+      <img
+        src="./assets/pertamina-geothermal.svg"
+        class="h-[8svh] w-auto mb-[8svh]"
+      />
+      <div class="text-[5svw] font-black mb-[4svh]">
+        Silakan Pilih Mode Permainan
+      </div>
+       <button onclick="window.location.href='/quiz'" class="bg-[#ce2a2b] font-black flex flex-col items-center justify-center rounded-3xl p-4 w-[80%] mb-[6svh] hover:bg-[#b82425] transition-colors">
+         <div class="text-[7svw]">SENDIRI</div>
+         <div class="text-[5svw]">Quiz Trivia</div>
+       </button>
+       <button disabled class="bg-gray-400 font-black flex flex-col items-center justify-center rounded-3xl p-4 w-[80%] cursor-not-allowed opacity-60">
+         <div class="text-[7svw]">DUEL</div>
+         <div class="text-[5svw]">Geothermal Challenge</div>
+       </button>
+     
+     </div>
+
+     <!-- Alert Dialog -->
+     <div id="alert-overlay" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+       <div class="bg-white rounded-2xl p-6 text-center max-w-sm w-[90%]">
+         <div id="alert-message" class="text-[4svw] font-bold text-gray-800 mb-6"></div>
+         <button id="alert-ok-btn" class="w-full px-4 py-3 rounded-2xl bg-blue-600 text-white text-[3.5svw] font-bold uppercase hover:bg-blue-700 transition-colors">
+           OK
+         </button>
+       </div>
+     </div>
+
+     <script>
+       document.addEventListener("DOMContentLoaded", function () {
+         // Gender selection functionality
+         const priaBtn = document.getElementById("pria-btn");
+         const wanitaBtn = document.getElementById("wanita-btn");
+         let selectedGender = null;
+
+         function selectGender(selectedBtn, otherBtn) {
+           // Remove blue border from other button
+           otherBtn.classList.remove("border-blue-600");
+           otherBtn.classList.add("border-transparent");
+
+           // Add blue border to selected button
+           selectedBtn.classList.remove("border-transparent");
+           selectedBtn.classList.add("border-blue-600");
+           
+           // Store selected gender
+           selectedGender = selectedBtn.id === "pria-btn" ? "Pria" : "Wanita";
+         }
+
+         if (priaBtn && wanitaBtn) {
+           priaBtn.addEventListener("click", function () {
+             selectGender(priaBtn, wanitaBtn);
+           });
+
+           wanitaBtn.addEventListener("click", function () {
+             selectGender(wanitaBtn, priaBtn);
+           });
+         }
+
+         // Form submission functionality
+         const submitBtn = document.getElementById("submit-btn");
+         const formSection = document.getElementById("form");
+         const modeSelectionSection = document.getElementById("mode-selection");
+
+         // Alert function
+         function showAlert(message) {
+           const alertOverlay = document.getElementById('alert-overlay');
+           const alertMessage = document.getElementById('alert-message');
+           const alertOkBtn = document.getElementById('alert-ok-btn');
+           
+           alertMessage.textContent = message;
+           alertOverlay.classList.remove('hidden');
+           
+           alertOkBtn.onclick = function() {
+             alertOverlay.classList.add('hidden');
+           };
+         }
+
+         if (submitBtn) {
+           submitBtn.addEventListener("click", function (e) {
+             e.preventDefault(); // Prevent default form submission
+             
+             // Get form data
+             const formData = {
+               namaLengkap: document.querySelector('input[type="text"]').value,
+               email: document.querySelector('input[type="email"]').value,
+               whatsapp: document.querySelector('input[type="tel"]').value,
+               jenisKelamin: selectedGender,
+               timestamp: new Date().toISOString()
+             };
+
+             // Validate form
+             if (!formData.namaLengkap || !formData.email || !formData.whatsapp || !formData.jenisKelamin) {
+               showAlert("Mohon lengkapi semua data profil!");
+               return;
+             }
+
+             // Save to localStorage
+             localStorage.setItem('userProfile', JSON.stringify(formData));
+             
+             // Hide form section and show mode selection
+             formSection.classList.add('hidden');
+             modeSelectionSection.classList.remove('hidden');
+             modeSelectionSection.classList.add('flex');
+           });
+         }
+       });
+     </script>
+  </body>
+</html>
