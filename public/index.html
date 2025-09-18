@@ -222,8 +222,7 @@
                namaLengkap: document.querySelector('input[type="text"]').value,
                email: document.querySelector('input[type="email"]').value,
                whatsapp: document.querySelector('input[type="tel"]').value,
-               jenisKelamin: selectedGender,
-               timestamp: new Date().toISOString()
+               jenisKelamin: selectedGender
              };
 
              // Validate form
@@ -258,7 +257,8 @@
                    email: formData.email,
                    whatsapp: formData.whatsapp,
                    gender: formData.jenisKelamin,
-                   timestamp: formData.timestamp
+                   "time-remaining": "0",
+                   score: "0"
                  }
                ]);
 
