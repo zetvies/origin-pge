@@ -308,6 +308,12 @@
         document.getElementById('player1-container').style.display = 'none';
         document.getElementById('player2-container').style.display = 'none';
         
+        // Hide back button when game starts
+        const backButton = document.querySelector('button');
+        if (backButton) {
+          backButton.style.display = 'none';
+        }
+        
         // Hide loading spinner
         const spinner = document.querySelector('.animate-spin');
         if (spinner) {
