@@ -16,20 +16,20 @@
         }
         
         .indicator-column {
-            width: 25%;
+            width: 10svw;
             height: 100vh;
             transition: background-color 0.3s ease;
         }
         
         .players-column {
-            width: 75%;
+            width: 90svw;
             height: 100vh;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             background-color: #ffffff;
-            padding: 20px;
+            padding: 5svw;
             box-sizing: border-box;
         }
         
@@ -44,10 +44,14 @@
         .player-names {
             display: flex;
             align-items: center;
-            gap:4rem;
+            justify-content:center;
+            gap:1rem;
             text-align: center;
             opacity: 0;
             transition: opacity 0.3s ease;
+            border: 2px solid #0066cc;
+            width:80svw;
+            height:13.33svw;
         }
         
         .player-names.show {
