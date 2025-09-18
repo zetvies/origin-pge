@@ -6,6 +6,7 @@
     <title>Pertamina - Duel</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
+    <script src="./config.js"></script>
     <style>
       @font-face {
         font-family: "Acumin Variable Concept";
@@ -93,7 +94,7 @@
       document.getElementById('player1-name').textContent = playerData.namaLengkap;
       
       // Connect to WebSocket server
-      const socket = io('https://origin-pge.onrender.com');
+      const socket = io(config.socketServerUrl);
       
       // Handle connection errors
       socket.on('connect_error', (error) => {

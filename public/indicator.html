@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pertamina - Indicator</title>
     <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
+    <script src="./config.js"></script>
     <style>
         body {
             margin: 0;
@@ -47,26 +48,41 @@
             justify-content:center;
             gap:1rem;
             text-align: center;
-            opacity: 0;
-            transition: opacity 0.3s ease;
             border: 2px solid #0066cc;
             width:80svw;
             height:13.33svw;
         }
         
-        .player-names.show {
+        .player-names .content {
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            display:flex;
+            align-items:center;
+            justify-content: center;
+            gap:2svw;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .player-names.show .content {
             opacity: 1;
         }
         
         .player-name {
-            font-size: 4rem;
+            
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4svw;
             font-weight: bold;
             margin: 10px 0;
             color: #0066cc;
         }
         
         .vs-text {
-            font-size: 2rem;
+            font-size: 2svw;
             font-weight: bold;
             margin: 20px 0;
             color: #0066cc;
@@ -77,15 +93,17 @@
     <div class="indicator-column"></div>
     <div class="players-column">
         <div class="player-names" id="playerNames">
-            <div class="player-name" id="player1Name">Player 1</div>
-            <div class="vs-text">VS</div>
-            <div class="player-name" id="player2Name">Player 2</div>
+            <div class="content">
+                <div class="player-name" id="player1Name">Player 1</div>
+                <div class="vs-text">VS</div>
+                <div class="player-name" id="player2Name">Player 2</div>
+            </div>
         </div>
     </div>
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             // Connect to WebSocket server
-            const socket = io('https://origin-pge.onrender.com');
+            const socket = io(config.socketServerUrl);
             
             // Handle connection
             socket.on('connect', () => {
