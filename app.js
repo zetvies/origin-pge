@@ -63,7 +63,14 @@ io.on('connection', (socket) => {
     // Handle game state requests (for indicator)
     socket.on('request-game-state', () => {
         console.log(`Sending game state to ${socket.id}: isPlaying=${isPlaying}`);
-        socket.emit('game-state-update', { isPlaying: isPlaying });
+        const player1 = duelQueue.length >= 1 ? duelQueue[0].name : null;
+        const player2 = duelQueue.length >= 2 ? duelQueue[1].name : null;
+        
+        socket.emit('game-state-update', { 
+            isPlaying: isPlaying,
+            player1: player1,
+            player2: player2
+        });
     });
 
     // Handle joining duel queue
@@ -191,7 +198,11 @@ function startDuel() {
     console.log('Starting duel between', duelQueue[0].name, 'and', duelQueue[1].name);
     
     // Broadcast game state change to all connected clients
-    io.emit('game-state-update', { isPlaying: isPlaying });
+    io.emit('game-state-update', { 
+        isPlaying: isPlaying,
+        player1: duelQueue[0].name,
+        player2: duelQueue[1].name
+    });
     
     // Notify first 2 players that duel is starting
     io.to(duelQueue[0].id).emit('duel-start', {
@@ -231,7 +242,11 @@ function endDuel() {
     console.log('Duel ended');
     
     // Broadcast game state change to all connected clients
-    io.emit('game-state-update', { isPlaying: isPlaying });
+    io.emit('game-state-update', { 
+        isPlaying: isPlaying,
+        player1: null,
+        player2: null
+    });
     
     // Notify first 2 players that game is finished
     if (duelQueue.length >= 1) {

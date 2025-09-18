@@ -11,19 +11,70 @@
             padding: 0;
             width: 100vw;
             height: 100vh;
+            display: flex;
+            font-family: Arial, sans-serif;
+        }
+        
+        .indicator-column {
+            width: 25%;
+            height: 100vh;
             transition: background-color 0.3s ease;
         }
         
-        .playing {
+        .players-column {
+            width: 75%;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background-color: #ffffff;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        
+        .playing .indicator-column {
             background-color: white;
         }
         
-        .not-playing {
+        .not-playing .indicator-column {
             background-color: black;
+        }
+        
+        .player-names {
+            text-align: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .player-names.show {
+            opacity: 1;
+        }
+        
+        .player-name {
+            font-size: 4rem;
+            font-weight: bold;
+            margin: 10px 0;
+            color: #0066cc;
+        }
+        
+        .vs-text {
+            font-size: 2rem;
+            font-weight: bold;
+            margin: 20px 0;
+            color: #0066cc;
         }
     </style>
 </head>
 <body class="not-playing">
+    <div class="indicator-column"></div>
+    <div class="players-column">
+        <div class="player-names" id="playerNames">
+            <div class="player-name" id="player1Name">Player 1</div>
+            <div class="vs-text">VS</div>
+            <div class="player-name" id="player2Name">Player 2</div>
+        </div>
+    </div>
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             // Connect to WebSocket server
@@ -43,13 +94,28 @@
             socket.on('game-state-update', (data) => {
                 console.log('Game state update:', data);
                 const body = document.body;
+                const playerNamesDiv = document.getElementById('playerNames');
                 
                 if (data.isPlaying) {
                     body.className = 'playing';
                     console.log('Indicator: WHITE (Game is playing)');
+                    
+                    // Show player names
+                    playerNamesDiv.classList.add('show');
+                    
+                    // Update player names if available
+                    if (data.player1) {
+                        document.getElementById('player1Name').textContent = data.player1;
+                    }
+                    if (data.player2) {
+                        document.getElementById('player2Name').textContent = data.player2;
+                    }
                 } else {
                     body.className = 'not-playing';
                     console.log('Indicator: BLACK (Game is not playing)');
+                    
+                    // Hide player names
+                    playerNamesDiv.classList.remove('show');
                 }
             });
             
