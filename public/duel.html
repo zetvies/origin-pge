@@ -93,7 +93,7 @@
       document.getElementById('player1-name').textContent = playerData.namaLengkap;
       
       // Connect to WebSocket server
-      const socket = io('http://localhost:3000');
+      const socket = io('https://origin-pge.onrender.com');
       
       // Handle connection errors
       socket.on('connect_error', (error) => {
